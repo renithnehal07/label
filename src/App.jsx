@@ -175,6 +175,14 @@ function faqAnswer(q) {
   return hit ? hit.a : "I'm not sure about that one — try the Report a Scam form or contact support@label.app for anything urgent.";
 }
 
+function BackButton({ onClick }) {
+  return (
+    <button onClick={onClick} className="flex items-center gap-1 mb-5" style={{ ...mono, fontSize: 12, color: C.black }}>
+      <ChevronLeft size={16} /> Back
+    </button>
+  );
+}
+
 // ---------------- Landing / Role / Onboard / Verify ----------------
 function Landing({ onStart }) {
   return (
@@ -194,7 +202,7 @@ function Landing({ onStart }) {
   );
 }
 
-function RoleSelect({ onPick }) {
+function RoleSelect({ onPick, onBack }) {
   const roles = [
     { id: "business", title: "Business", desc: "Post brand deals, review applicants, chat & pay creators", icon: Store },
     { id: "creator", title: "Creator", desc: "Model, influencer or content creator — apply to deals with your portfolio", icon: Camera },
@@ -202,6 +210,7 @@ function RoleSelect({ onPick }) {
   ];
   return (
     <div className="min-h-screen flex flex-col justify-center px-6" style={{ background: C.cream }}>
+      {onBack && <BackButton onClick={onBack} />}
       <div style={{ ...mono, color: C.black, fontSize: 11 }} className="uppercase tracking-widest opacity-50 mb-2">Step 1 of 3</div>
       <h2 style={{ ...display, color: C.black, fontSize: 26 }} className="mb-6">How will you use Label?</h2>
       <div className="flex flex-col gap-3">
@@ -219,7 +228,7 @@ function RoleSelect({ onPick }) {
   );
 }
 
-function Onboard({ role, onDone }) {
+function Onboard({ role, onDone, onBack }) {
   const [name, setName] = useState("");
   const [a, setA] = useState("");
   const [b, setB] = useState("");
@@ -232,6 +241,7 @@ function Onboard({ role, onDone }) {
   }[role];
   return (
     <div className="min-h-screen flex flex-col justify-center px-6" style={{ background: C.cream }}>
+      {onBack && <BackButton onClick={onBack} />}
       <div style={{ ...mono, color: C.black, fontSize: 11 }} className="uppercase tracking-widest opacity-50 mb-2">Step 2 of 3</div>
       <h2 style={{ ...display, color: C.black, fontSize: 26 }} className="mb-6">Quick profile</h2>
       <Field label="Your name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Alex Rivera" />
@@ -249,7 +259,7 @@ function Onboard({ role, onDone }) {
   );
 }
 
-function Verify({ onDone }) {
+function Verify({ onDone, onBack }) {
   const [regNumber, setRegNumber] = useState("");
   const [doc, setDoc] = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -269,6 +279,7 @@ function Verify({ onDone }) {
 
   return (
     <div className="min-h-screen flex flex-col justify-center px-6" style={{ background: C.cream }}>
+      {onBack && <BackButton onClick={onBack} />}
       <div style={{ ...mono, color: C.black, fontSize: 11 }} className="uppercase tracking-widest opacity-50 mb-2">Step 3 of 3</div>
       <h2 style={{ ...display, color: C.black, fontSize: 26 }} className="mb-4">Verify your business</h2>
       <InfoNote>
@@ -731,9 +742,9 @@ export default function Label() {
   return (
     <div style={{ ...body, maxWidth: 420, background: C.cream, minHeight: "100vh" }} className="mx-auto relative">
       {screen === "landing" && <Landing onStart={() => setScreen("role")} />}
-      {screen === "role" && <RoleSelect onPick={(r) => { setRole(r); setTab(r === "normal" ? "swap" : "deals"); setScreen("onboard"); }} />}
-      {screen === "onboard" && <Onboard role={role} onDone={(p) => { setProfile(p); setScreen(needsVerify ? "verify" : "app"); }} />}
-      {screen === "verify" && <Verify onDone={() => { setProfile((p) => ({ ...p, verified: true })); setScreen("app"); }} />}
+      {screen === "role" && <RoleSelect onPick={(r) => { setRole(r); setTab(r === "normal" ? "swap" : "deals"); setScreen("onboard"); }} onBack={profile ? () => { setScreen("app"); setTab("profile"); } : () => setScreen("landing")} />}
+      {screen === "onboard" && <Onboard role={role} onDone={(p) => { setProfile(p); setScreen(needsVerify ? "verify" : "app"); }} onBack={() => setScreen("role")} />}
+      {screen === "verify" && <Verify onDone={() => { setProfile((p) => ({ ...p, verified: true })); setScreen("app"); }} onBack={() => setScreen("onboard")} />}
 
       {screen === "app" && !activeChat && (
         <>
